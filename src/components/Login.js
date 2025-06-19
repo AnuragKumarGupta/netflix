@@ -1,10 +1,71 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Header from "./Header";
+import { checkValidate } from "../utils/validate";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "../utils/firebase"; // Ensure this path is correct
 
 const Login = () => {
   const [isSignIn, setIsSignIn] = useState(true);
+  const [errorMesssage, setErrorMessage] = useState("");
+
+  const name = useRef(null);
+  const email = useRef(null);
+  const password = useRef(null);
+
   const handleSignIn = () => {
     setIsSignIn(!isSignIn);
+  };
+  const handleValidate = (e) => {
+    e.preventDefault(); // Stop default form submit
+    const message = checkValidate(
+      name.current?.value || "",
+      email.current?.value || "",
+      password.current?.value || "",
+      isSignIn
+    );
+    setErrorMessage(message || "");
+
+    if (message) {
+      return;
+    } // If there's an error, stop here
+
+    if (!isSignIn) {
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + ":" + errorMessage);
+        });
+    } else {
+      // Handle sign-in logic here
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + ":" + errorMessage);
+        });
+    }
   };
   return (
     <div className="relative h-screen w-full">
@@ -18,7 +79,7 @@ const Login = () => {
           src="https://assets.nflxext.com/ffe/siteui/vlv3/7968847f-3da9-44b3-8bbb-13a46579881f/web/IN-en-20250609-TRIFECTA-perspective_32b70b51-20d4-46db-8a1a-3d5428be5f0e_small.jpg"
           alt="background"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/50"></div>
       </div>
 
       {/* Centered Login Form */}
@@ -30,24 +91,29 @@ const Login = () => {
           {/* //conditional rendering for sing up and sign in */}
           {!isSignIn && (
             <input
+              ref={name}
               className="p-4 mb-4 border border-gray-700 rounded-sm bg-gray-800 text-white placeholder-gray-400"
               type="text"
               placeholder="Enter Full Name"
             />
           )}
           <input
+            ref={email}
             className="p-4 mb-4 border border-gray-700 rounded-sm bg-gray-800 text-white placeholder-gray-400"
             type="email"
             placeholder="Enter Email"
           />
           <input
+            ref={password}
             className="p-4 mb-4 border border-gray-700 rounded-sm bg-gray-800 text-white placeholder-gray-400"
             type="password"
             placeholder="Enter Password"
           />
+          <p className="font-bold text-red-500">{errorMesssage}</p>
           <button
             className="p-4 mb-4 bg-red-600 hover:bg-red-700 rounded-sm"
             type="submit"
+            onClick={handleValidate}
           >
             Login
           </button>
