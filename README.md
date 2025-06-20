@@ -10,6 +10,8 @@
 - firebase setup
 - Deployed app on prod
 - create signup user account
+- create appstore > configure appstore > create userSlice > import userSlice and configure in appsotre > providing store in app.js file
+-
 
 # Features
 

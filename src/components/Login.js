@@ -4,20 +4,23 @@ import { checkValidate } from "../utils/validate";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
-import { auth } from "../utils/firebase"; // Ensure this path is correct
+import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice"; // Adjust the import path as necessary
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isSignIn, setIsSignIn] = useState(true);
-  const [errorMesssage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const name = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
 
-  const handleSignIn = () => {
-    setIsSignIn(!isSignIn);
-  };
   const handleValidate = (e) => {
     e.preventDefault(); // Stop default form submit
     const message = checkValidate(
@@ -41,7 +44,27 @@ const Login = () => {
         .then((userCredential) => {
           // Signed up
           const user = userCredential.user;
-          console.log(user);
+          updateProfile(user, {
+            displayName: name.current.value,
+            photoURL:
+              "https://avatars.githubusercontent.com/u/41558438?v=4&size=64",
+          })
+            .then(() => {
+              const { uid, email, displayName, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  displayName: displayName,
+                  photoURL: photoURL,
+                })
+              );
+              console.log(user);
+              navigate("/browse");
+            })
+            .catch((error) => {
+              setErrorMessage(error.message);
+            });
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -59,6 +82,7 @@ const Login = () => {
           // Signed in
           const user = userCredential.user;
           console.log(user);
+          navigate("/browse");
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -66,6 +90,9 @@ const Login = () => {
           setErrorMessage(errorCode + ":" + errorMessage);
         });
     }
+  };
+  const handleSignIn = () => {
+    setIsSignIn(!isSignIn);
   };
   return (
     <div className="relative h-screen w-full">
@@ -109,13 +136,13 @@ const Login = () => {
             type="password"
             placeholder="Enter Password"
           />
-          <p className="font-bold text-red-500">{errorMesssage}</p>
+          <p className="font-bold text-red-500">{errorMessage}</p>
           <button
             className="p-4 mb-4 bg-red-600 hover:bg-red-700 rounded-sm"
             type="submit"
             onClick={handleValidate}
           >
-            Login
+            {isSignIn ? "Sign In" : "Sign Up"}
           </button>
 
           <p className="text-center text-sm mb-4">OR</p>
