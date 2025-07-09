@@ -13,15 +13,13 @@ const Header = () => {
   const navigate = useNavigate();
   const handleSignOut = () => {
     signOut(auth)
-      .then(() => {
-        navigate("/");
-      })
+      .then(() => {})
       .catch((error) => {
         navigate("/error");
       });
   };
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         const { uid, email, displayName, photoURL } = user;
         dispatch(
@@ -32,10 +30,14 @@ const Header = () => {
             photoURL: photoURL,
           })
         );
+        navigate("/browse");
       } else {
         dispatch(removeUser());
+        navigate("/");
       }
     });
+    //unsubscribe when function unmount
+    return () => unsubscribe();
   }, []);
   return (
     <div className="w-screen absolute px-8 py-2 z-10 flex justify-between bg-gradient-to-b from-black">
