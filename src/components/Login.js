@@ -10,6 +10,8 @@ import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice"; // Adjust the import path as necessary
+import { USER_AVATAR } from "../utils/constant";
+import { BACKGROUND_IMG } from "../utils/constant";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -46,8 +48,7 @@ const Login = () => {
           const user = userCredential.user;
           updateProfile(user, {
             displayName: name.current.value,
-            photoURL:
-              "https://avatars.githubusercontent.com/u/41558438?v=4&size=64",
+            photoURL: USER_AVATAR,
           })
             .then(() => {
               const { uid, email, displayName, photoURL } = auth.currentUser;
@@ -99,7 +100,7 @@ const Login = () => {
       <div className="absolute inset-0">
         <img
           className="w-full h-full object-cover scale-105"
-          src="https://assets.nflxext.com/ffe/siteui/vlv3/7968847f-3da9-44b3-8bbb-13a46579881f/web/IN-en-20250609-TRIFECTA-perspective_32b70b51-20d4-46db-8a1a-3d5428be5f0e_small.jpg"
+          src={BACKGROUND_IMG}
           alt="background"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/50"></div>
